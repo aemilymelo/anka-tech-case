@@ -5,6 +5,9 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
+
 
 type Cliente = {
   id: number;
@@ -146,9 +149,9 @@ export default function ClientesPage() {
                 <Link href={`/ativos-cliente/${cliente.id}`}>Ver</Link>
               </td>
               <td>
-                <button onClick={() => handleEdit(cliente)}>Editar</button>
-                <button onClick={() => handleDelete(cliente.id)}>Deletar</button>
-                <button onClick={() => handleAddAtivo(cliente.id)}>Adicionar Ativo</button>
+                <Button onClick={() => handleEdit(cliente)}>Editar</Button>
+                <Button onClick={() => handleDelete(cliente.id)}>Deletar</Button>
+                <Button onClick={() => handleAddAtivo(cliente.id)}>Adicionar Ativo</Button>
               </td>
             </tr>
           ))}
@@ -158,12 +161,12 @@ export default function ClientesPage() {
       <h2>{editingClient ? "Editar Cliente" : "Cadastrar Novo Cliente"}</h2>
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <input type="text" placeholder="Nome" {...register("nome")} />
+          <Input type="text" placeholder="Nome" {...register("nome")} />
           {errors.nome && <p style={{ color: "red" }}>{errors.nome.message}</p>}
         </div>
 
         <div>
-          <input type="email" placeholder="Email" {...register("email")} />
+          <Input type="email" placeholder="Email" {...register("email")} />
           {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
         </div>
 
@@ -174,9 +177,9 @@ export default function ClientesPage() {
           </select>
         </div>
 
-        <button type="submit">
+        <Button type="submit">
           {editingClient ? "Atualizar Cliente" : "Cadastrar Cliente"}
-        </button>
+        </Button>
       </form>
 
       {showAtivoForm && (
@@ -184,7 +187,7 @@ export default function ClientesPage() {
           <h2>Cadastrar Novo Ativo</h2>
           <form onSubmit={handleCadastrarAtivo}>
             <div>
-              <input
+              <Input
                 type="text"
                 placeholder="Nome do Ativo"
                 value={nomeAtivo}
@@ -192,7 +195,7 @@ export default function ClientesPage() {
               />
             </div>
             <div>
-              <input
+              <Input
                 type="number"
                 placeholder="Valor"
                 value={valorAtivo}
@@ -200,7 +203,7 @@ export default function ClientesPage() {
                 step="0.01"
               />
             </div>
-            <button type="submit">Cadastrar Ativo</button>
+            <Button type="submit">Cadastrar Ativo</Button>
           </form>
         </div>
       )}

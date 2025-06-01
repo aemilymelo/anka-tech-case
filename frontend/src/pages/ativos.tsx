@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { useState } from 'react'
+import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
 
 type Ativo = {
   id: number
@@ -71,25 +73,25 @@ export function CadastroAtivo() {
     <div style={{ padding: '2rem' }}>
       <h1>Cadastrar Ativo</h1>
       <form onSubmit={handleSubmit}>
-        <input
+        <Input
           type="text"
           placeholder="Nome do Ativo"
           value={nome}
           onChange={(e) => setNome(e.target.value)}
         />
-        <input
+        <Input
           type="number"
           placeholder="Valor"
           value={valor}
           onChange={(e) => setValor(e.target.value)}
         />
-        <input
+        <Input
           type="number"
           placeholder="ID do Cliente"
           value={clienteId}
           onChange={(e) => setClienteId(e.target.value)}
         />
-        <button type="submit">Cadastrar</button>
+        <Button type="submit">Cadastrar</Button>
       </form>
     </div>
   )
