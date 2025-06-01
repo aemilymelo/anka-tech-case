@@ -26,13 +26,14 @@ export default function ClientesPage() {
     },
   });
 
-  if (isLoading) return <p>Carregando...</p>;
-  if (error) return <p>Erro ao carregar os clientes</p>;
 
   // Formulário de cadastro de cliente
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState(true);
+
+  if (isLoading) return <p>Carregando...</p>;
+  if (error) return <p>Erro ao carregar os clientes</p>;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
 import fastifyCors from '@fastify/cors'
 
-
 const app = Fastify()
 app.register(fastifyCors, {
   origin: '*', // Permitir todas as origens. Ajuste conforme necessário.
@@ -60,6 +59,7 @@ app.put('/clientes/:id', async (request, reply) => {
 
   return reply.send(clienteAtualizado)
 })
+
 // Rota: listar todos os ativos
 app.get('/ativos', async () => {
   const ativos = await prisma.ativo.findMany()
@@ -82,23 +82,47 @@ app.post('/ativos', async (request, reply) => {
 
   return reply.status(201).send(ativo)
 })
-// Rota: listar ativos de um cliente
+
+// Rota: listar ativos de um cliente específico
 app.get('/clientes/:id/ativos', async (request, reply) => {
-  // Define the type of request.params
   const schemaParams = z.object({
     id: z.string(),
-  });
-  const { id } = schemaParams.parse(request.params);
+  })
+  const { id } = schemaParams.parse(request.params)
 
   const clienteAtivos = await prisma.ativo.findMany({
     where: {
       clienteId: Number(id),
     },
-  });
+  })
 
-  return reply.send(clienteAtivos);
-});
+  return reply.send(clienteAtivos)
+})
 
+// Rota: criar novo ativo para um cliente específico
+app.post('/clientes/:id/ativos', async (request, reply) => {
+  const schemaParams = z.object({
+    id: z.string(),
+  })
+
+  const schemaBody = z.object({
+    nome: z.string(),
+    valor: z.number().min(0),
+  })
+
+  const { id } = schemaParams.parse(request.params)
+  const data = schemaBody.parse(request.body)
+
+  const ativo = await prisma.ativo.create({
+    data: {
+      nome: data.nome,
+      valor: data.valor,
+      clienteId: Number(id), // Associando o ativo ao cliente com o ID
+    },
+  })
+
+  return reply.status(201).send(ativo)
+})
 
 // Iniciar o servidor
 app.listen({ port: 3333 }, (err, address) => {
@@ -106,5 +130,5 @@ app.listen({ port: 3333 }, (err, address) => {
     console.error(err)
     process.exit(1)
   }
-  console.log(` Servidor rodando em: ${address}`)
+  console.log(`Servidor rodando em: ${address}`)
 })
