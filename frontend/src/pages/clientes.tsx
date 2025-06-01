@@ -57,6 +57,7 @@ export default function ClientesPage() {
     handleSubmit,
     setValue,
     reset,
+    watch,
     formState: { errors },
   } = useForm<ClienteFormData>({
     resolver: zodResolver(clienteSchema),
@@ -186,10 +187,14 @@ export default function ClientesPage() {
         </div>
 
         <div>
-          <select {...register("status")}>
-            <option value="true">Ativo</option>
-            <option value="false">Inativo</option>
+          <select
+              onChange={(e) => setValue("status", e.target.value === "true")}
+              value={watch("status") ? "true" : "false"}
+            >
+              <option value="true">Ativo</option>
+              <option value="false">Inativo</option>
           </select>
+
         </div>
 
         <Button type="submit">
