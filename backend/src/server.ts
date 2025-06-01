@@ -1,8 +1,13 @@
 import Fastify from 'fastify'
 import { PrismaClient } from '@prisma/client'
 import { z } from 'zod'
+import fastifyCors from '@fastify/cors'
+
 
 const app = Fastify()
+app.register(fastifyCors, {
+  origin: '*', // Permitir todas as origens. Ajuste conforme necessário.
+})
 const prisma = new PrismaClient()
 
 // Rota de teste
