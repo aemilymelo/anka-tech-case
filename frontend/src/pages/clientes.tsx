@@ -1,7 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { useState } from "react";
 import Link from "next/link";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 type Cliente = {
   id: number;
@@ -10,45 +13,112 @@ type Cliente = {
   status: boolean;
 };
 
+const clienteSchema = z.object({
+  nome: z.string().min(1, "Nome obrigatório"),
+  email: z.string().email("Email inválido"),
+  status: z.coerce.boolean(),
+});
+
+type ClienteFormData = z.infer<typeof clienteSchema>;
+
 export default function ClientesPage() {
-  // Buscar dados da API
   const {
     data: clientes,
     isLoading,
     error,
+    refetch,
   } = useQuery({
     queryKey: ["clientes"],
     queryFn: async () => {
-      const response = await axios.get<Cliente[]>(
-        "http://localhost:3333/clientes"
-      );
+      const response = await axios.get<Cliente[]>("http://localhost:3333/clientes");
       return response.data;
     },
   });
 
+  const [editingClient, setEditingClient] = useState<Cliente | null>(null);
+  const [showAtivoForm, setShowAtivoForm] = useState(false);
+  const [clienteIdForAtivo, setClienteIdForAtivo] = useState<number | null>(null);
+  const [nomeAtivo, setNomeAtivo] = useState("");
+  const [valorAtivo, setValorAtivo] = useState("");
 
-  // Formulário de cadastro de cliente
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState(true);
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<ClienteFormData>({
+    resolver: zodResolver(clienteSchema),
+    defaultValues: {
+      status: true,
+    },
+  });
+
+  const onSubmit = async (data: ClienteFormData) => {
+    try {
+      if (editingClient) {
+        await axios.put(`http://localhost:3333/clientes/${editingClient.id}`, data);
+        alert("Cliente atualizado com sucesso!");
+      } else {
+        await axios.post("http://localhost:3333/clientes", data);
+        alert("Cliente cadastrado com sucesso!");
+      }
+
+      reset();
+      setEditingClient(null);
+      refetch();
+    } catch (error) {
+      alert("Erro ao cadastrar ou editar cliente");
+    }
+  };
+
+  const handleEdit = (cliente: Cliente) => {
+    setValue("nome", cliente.nome);
+    setValue("email", cliente.email);
+    setValue("status", cliente.status);
+    setEditingClient(cliente);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:3333/clientes/${id}`);
+      alert("Cliente deletado com sucesso!");
+      refetch();
+    } catch (error) {
+      alert("Erro ao deletar cliente");
+    }
+  };
+
+  const handleAddAtivo = (clienteId: number) => {
+    setClienteIdForAtivo(clienteId);
+    setShowAtivoForm(true);
+  };
+
+  const handleCadastrarAtivo = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!nomeAtivo || !valorAtivo) {
+      alert("Preencha todos os campos!");
+      return;
+    }
+
+    try {
+      await axios.post(`http://localhost:3333/clientes/${clienteIdForAtivo}/ativos`, {
+        nome: nomeAtivo,
+        valor: parseFloat(valorAtivo),
+      });
+      alert("Ativo adicionado com sucesso!");
+      setShowAtivoForm(false);
+      setNomeAtivo("");
+      setValorAtivo("");
+      refetch();
+    } catch (error) {
+      alert("Erro ao cadastrar ativo");
+    }
+  };
 
   if (isLoading) return <p>Carregando...</p>;
   if (error) return <p>Erro ao carregar os clientes</p>;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      await axios.post("http://localhost:3333/clientes", {
-        nome,
-        email,
-        status,
-      });
-      alert("Cliente cadastrado com sucesso!");
-    } catch (error) {
-      alert("Erro ao cadastrar cliente");
-    }
-  };
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -62,6 +132,7 @@ export default function ClientesPage() {
             <th>Email</th>
             <th>Status</th>
             <th>Ativos</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -72,42 +143,67 @@ export default function ClientesPage() {
               <td>{cliente.email}</td>
               <td>{cliente.status ? "Ativo" : "Inativo"}</td>
               <td>
-                <Link href={`/ativos-cliente/${cliente.id}`}> Ver</Link>
+                <Link href={`/ativos-cliente/${cliente.id}`}>Ver</Link>
+              </td>
+              <td>
+                <button onClick={() => handleEdit(cliente)}>Editar</button>
+                <button onClick={() => handleDelete(cliente.id)}>Deletar</button>
+                <button onClick={() => handleAddAtivo(cliente.id)}>Adicionar Ativo</button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h2>Cadastrar Novo Cliente</h2>
-      <form onSubmit={handleSubmit}>
+      <h2>{editingClient ? "Editar Cliente" : "Cadastrar Novo Cliente"}</h2>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <input
-            type="text"
-            placeholder="Nome do Cliente"
-            value={nome}
-            onChange={(e) => setNome(e.target.value)}
-          />
+          <input type="text" placeholder="Nome" {...register("nome")} />
+          {errors.nome && <p style={{ color: "red" }}>{errors.nome.message}</p>}
         </div>
+
         <div>
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
+          <input type="email" placeholder="Email" {...register("email")} />
+          {errors.email && <p style={{ color: "red" }}>{errors.email.message}</p>}
         </div>
+
         <div>
-          <select
-            value={status.toString()} // Converte o status para string ("true" ou "false")
-            onChange={(e) => setStatus(e.target.value === "true")} // Converte a string de volta para booleano
-          >
+          <select {...register("status")}>
             <option value="true">Ativo</option>
             <option value="false">Inativo</option>
           </select>
         </div>
-        <button type="submit">Cadastrar Cliente</button>
+
+        <button type="submit">
+          {editingClient ? "Atualizar Cliente" : "Cadastrar Cliente"}
+        </button>
       </form>
+
+      {showAtivoForm && (
+        <div>
+          <h2>Cadastrar Novo Ativo</h2>
+          <form onSubmit={handleCadastrarAtivo}>
+            <div>
+              <input
+                type="text"
+                placeholder="Nome do Ativo"
+                value={nomeAtivo}
+                onChange={(e) => setNomeAtivo(e.target.value)}
+              />
+            </div>
+            <div>
+              <input
+                type="number"
+                placeholder="Valor"
+                value={valorAtivo}
+                onChange={(e) => setValorAtivo(e.target.value)}
+                step="0.01"
+              />
+            </div>
+            <button type="submit">Cadastrar Ativo</button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }

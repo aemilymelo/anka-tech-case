@@ -12,7 +12,7 @@ model Cliente {
   nome   String
   email  String
   status Boolean
-  ativos Ativo[]
+  ativos Ativo[] // Sem a necessidade de onDelete aqui
 }
 
 model Ativo {
@@ -20,7 +20,7 @@ model Ativo {
   nome      String
   valor     Float
   clienteId Int
-  cliente   Cliente @relation(fields: [clienteId], references: [id])
-
-  @@index([clienteId], map: "Ativo_clienteId_fkey")
+  cliente   Cliente @relation(fields: [clienteId], references: [id], onDelete: Cascade) // Cascateamento de deleção no lado da relação inversa
 }
+
+

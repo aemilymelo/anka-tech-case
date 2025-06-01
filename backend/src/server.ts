@@ -5,7 +5,8 @@ import fastifyCors from '@fastify/cors'
 
 const app = Fastify()
 app.register(fastifyCors, {
-  origin: '*', // Permitir todas as origens. Ajuste conforme necessário.
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Permitir todas as origens. Ajuste conforme necessário.
 })
 const prisma = new PrismaClient()
 
@@ -122,6 +123,79 @@ app.post('/clientes/:id/ativos', async (request, reply) => {
   })
 
   return reply.status(201).send(ativo)
+})
+// Rota: editar ativo existente
+app.put('/ativos/:id', async (request, reply) => {
+  const schemaParams = z.object({
+    id: z.string(),
+  })
+
+  const schemaBody = z.object({
+    nome: z.string(),
+    valor: z.number().min(0), // Valor não pode ser negativo
+  })
+
+  const { id } = schemaParams.parse(request.params)
+  const data = schemaBody.parse(request.body)
+
+  try {
+    const ativoAtualizado = await prisma.ativo.update({
+      where: { id: Number(id) },
+      data,
+    })
+    return reply.status(200).send(ativoAtualizado)
+  } catch (error) {
+    return reply.status(400).send({ message: 'Erro ao editar o ativo' })
+  }
+})
+
+// Rota: deletar ativo
+app.delete('/ativos/:id', async (request, reply) => {
+  const schemaParams = z.object({
+    id: z.string(),
+  })
+
+  const { id } = schemaParams.parse(request.params)
+
+  try {
+    await prisma.ativo.delete({
+      where: { id: Number(id) },
+    })
+    return reply.status(200).send({ message: 'Ativo deletado com sucesso!' })
+  } catch (error) {
+    return reply.status(400).send({ message: 'Erro ao deletar o ativo' })
+  }
+})
+
+
+// Rota: deletar cliente
+app.delete('/clientes/:id', async (request, reply) => {
+  const schemaParams = z.object({
+    id: z.string(),
+  })
+  const { id } = schemaParams.parse(request.params)
+
+  try {
+    // Deleta o cliente com o ID especificado
+    await prisma.cliente.delete({
+      where: { id: Number(id) },
+    })
+
+    return reply.status(200).send({ message: 'Cliente deletado com sucesso!' })
+  } catch (error) {
+    return reply.status(400).send({ message: 'Erro ao deletar o cliente' })
+  }
+})
+
+// Rota: listar ativos fixos (dados estáticos)
+app.get('/ativos-fixos', async () => {
+  const ativosFixos = [
+    { id: 1, nome: 'Ação XYZ', valor: 150.5 },
+    { id: 2, nome: 'Fundo ABC', valor: 250.01 },
+    { id: 3, nome: 'Tesouro Direto', valor: 1200.0 }
+  ]
+
+  return ativosFixos
 })
 
 // Iniciar o servidor

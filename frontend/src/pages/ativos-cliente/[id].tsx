@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { useRouter } from 'next/router'
+import { z } from 'zod'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 
 type Ativo = {
@@ -9,47 +12,70 @@ type Ativo = {
   valor: number
 }
 
+// Schema de validação com Zod
+const ativoSchema = z.object({
+  nome: z.string().min(1, 'Nome obrigatório'),
+  valor: z.coerce.number().positive('Valor deve ser maior que 0'),
+})
+
+type AtivoFormData = z.infer<typeof ativoSchema>
+
 export default function AtivosPorClientePage() {
   const router = useRouter()
   const { id } = router.query
 
-  const { data: ativos, isLoading, error } = useQuery({
+  const { data: ativos, isLoading, error, refetch } = useQuery({
     queryKey: ['ativos', id],
     queryFn: async () => {
       const response = await axios.get<Ativo[]>(`http://localhost:3333/clientes/${id}/ativos`)
       return response.data
     },
-    enabled: !!id, // Garante que a requisição só será feita se o `id` estiver presente
+    enabled: !!id,
   })
 
-  const [nomeAtivo, setNomeAtivo] = useState('')
-  const [valorAtivo, setValorAtivo] = useState('')
+  const [editingAtivo, setEditingAtivo] = useState<Ativo | null>(null)
 
-  // Função de envio de formulário para cadastrar o novo ativo
-  const handleCadastrarAtivo = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<AtivoFormData>({
+    resolver: zodResolver(ativoSchema),
+  })
 
-    if (!nomeAtivo || !valorAtivo) {
-      alert('Preencha todos os campos!')
-      return
-    }
-
+  const onSubmit = async (data: AtivoFormData) => {
     try {
-      // Enviar os dados do novo ativo para o backend
-      await axios.post(`http://localhost:3333/clientes/${id}/ativos`, {
-        nome: nomeAtivo,
-        valor: parseFloat(valorAtivo)
-      })
+      if (editingAtivo) {
+        await axios.put(`http://localhost:3333/ativos/${editingAtivo.id}`, data)
+        alert('Ativo atualizado com sucesso!')
+      } else {
+        await axios.post(`http://localhost:3333/clientes/${id}/ativos`, data)
+        alert('Ativo cadastrado com sucesso!')
+      }
 
-      // Limpar os campos após o cadastro
-      setNomeAtivo('')
-      setValorAtivo('')
-      alert('Ativo cadastrado com sucesso!')
-
-      // Recarregar a lista de ativos para mostrar o novo ativo
-      router.replace(router.asPath)
+      reset()
+      setEditingAtivo(null)
+      refetch()
     } catch (err) {
-      alert('Erro ao cadastrar ativo')
+      alert('Erro ao cadastrar ou editar ativo')
+    }
+  }
+
+  const handleEdit = (ativo: Ativo) => {
+    setValue('nome', ativo.nome)
+    setValue('valor', ativo.valor)
+    setEditingAtivo(ativo)
+  }
+
+  const handleDelete = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:3333/ativos/${id}`)
+      alert('Ativo deletado com sucesso!')
+      refetch()
+    } catch (err) {
+      alert('Erro ao deletar ativo')
     }
   }
 
@@ -60,13 +86,13 @@ export default function AtivosPorClientePage() {
     <div style={{ padding: '2rem' }}>
       <h1>Ativos do Cliente {id}</h1>
 
-      {/* Tabela de ativos */}
       <table border={1} cellPadding={10} cellSpacing={0}>
         <thead>
           <tr>
             <th>ID</th>
             <th>Nome</th>
             <th>Valor</th>
+            <th>Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -75,32 +101,36 @@ export default function AtivosPorClientePage() {
               <td>{ativo.id}</td>
               <td>{ativo.nome}</td>
               <td>R$ {ativo.valor.toFixed(2)}</td>
+              <td>
+                <button onClick={() => handleEdit(ativo)}>Editar</button>
+                <button onClick={() => handleDelete(ativo.id)}>Deletar</button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/* Formulário de cadastro de ativo */}
-      <h2 style={{ marginTop: '2rem' }}>Cadastrar novo ativo</h2>
-      <form onSubmit={handleCadastrarAtivo}>
+      <h2 style={{ marginTop: '2rem' }}>
+        {editingAtivo ? 'Editar Ativo' : 'Cadastrar Novo Ativo'}
+      </h2>
+
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <input
-            type="text"
-            placeholder="Nome do ativo"
-            value={nomeAtivo}
-            onChange={(e) => setNomeAtivo(e.target.value)}
-          />
+          <input type="text" placeholder="Nome do ativo" {...register('nome')} />
+          {errors.nome && <p style={{ color: 'red' }}>{errors.nome.message}</p>}
         </div>
         <div>
           <input
             type="number"
-            placeholder="Valor"
-            value={valorAtivo}
-            onChange={(e) => setValorAtivo(e.target.value)}
             step="0.01"
+            placeholder="Valor"
+            {...register('valor')}
           />
+          {errors.valor && <p style={{ color: 'red' }}>{errors.valor.message}</p>}
         </div>
-        <button type="submit" style={{ marginTop: '0.5rem' }}>Cadastrar Ativo</button>
+        <button type="submit">
+          {editingAtivo ? 'Atualizar Ativo' : 'Cadastrar Ativo'}
+        </button>
       </form>
     </div>
   )
