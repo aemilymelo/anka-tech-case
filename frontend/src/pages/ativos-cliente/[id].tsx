@@ -5,6 +5,8 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
+import { Button } from "@/components/ui/button";
+import { Input } from '@/components/ui/input';
 
 type Ativo = {
   id: number
@@ -102,8 +104,8 @@ export default function AtivosPorClientePage() {
               <td>{ativo.nome}</td>
               <td>R$ {ativo.valor.toFixed(2)}</td>
               <td>
-                <button onClick={() => handleEdit(ativo)}>Editar</button>
-                <button onClick={() => handleDelete(ativo.id)}>Deletar</button>
+                <Button onClick={() => handleEdit(ativo)}>Editar</Button>
+                <Button onClick={() => handleDelete(ativo.id)}>Deletar</Button>
               </td>
             </tr>
           ))}
@@ -116,11 +118,11 @@ export default function AtivosPorClientePage() {
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
-          <input type="text" placeholder="Nome do ativo" {...register('nome')} />
+          <Input type="text" placeholder="Nome do ativo" {...register('nome')} />
           {errors.nome && <p style={{ color: 'red' }}>{errors.nome.message}</p>}
         </div>
         <div>
-          <input
+          <Input
             type="number"
             step="0.01"
             placeholder="Valor"
@@ -128,9 +130,9 @@ export default function AtivosPorClientePage() {
           />
           {errors.valor && <p style={{ color: 'red' }}>{errors.valor.message}</p>}
         </div>
-        <button type="submit">
+        <Button type="submit">
           {editingAtivo ? 'Atualizar Ativo' : 'Cadastrar Ativo'}
-        </button>
+        </Button>
       </form>
     </div>
   )

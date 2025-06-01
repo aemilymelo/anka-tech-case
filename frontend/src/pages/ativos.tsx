@@ -3,6 +3,8 @@ import axios from 'axios'
 import { useState } from 'react'
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/router';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 
 type Ativo = {
   id: number
@@ -12,6 +14,16 @@ type Ativo = {
 
 // Página para listar ativos
 export default function AtivosPage() {
+  const router = useRouter();
+  
+  const handleBack = () => {
+    router.back();
+  };
+
+  const handleRedirectToFixedAssets = () => {
+    router.push('/ativos-fixos'); 
+  }
+
   const { data: ativos, isLoading, error } = useQuery({
     queryKey: ['ativos'],
     queryFn: async () => {
@@ -21,33 +33,35 @@ export default function AtivosPage() {
   })
 
   if (isLoading) return <p>Carregando ativos...</p>
-  if (error) return <p>Erro ao carregar ativos 😢</p>
+  if (error) return <p>Erro ao carregar ativos </p>
 
   return (
     <div style={{ padding: '2rem' }}>
+      <Button onClick={handleBack}>Voltar</Button>
+      <Button onClick={handleRedirectToFixedAssets}>Ir para Ativos Fixos</Button>
       <h1>Lista de Ativos</h1>
-      <table border={1} cellPadding={10} cellSpacing={0}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Valor</th>
-          </tr>
-        </thead>
-        <tbody>
-          {ativos?.map(ativo => (
-            <tr key={ativo.id}>
-              <td>{ativo.id}</td>
-              <td>{ativo.nome}</td>
-              <td>{ativo.valor}</td>
-            </tr>
+
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Nome</TableHead>
+            <TableHead>Valor</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {ativos?.map((ativo) => (
+            <TableRow key={ativo.id}>
+              <TableCell>{ativo.id}</TableCell>
+              <TableCell>{ativo.nome}</TableCell>
+              <TableCell>R$ {ativo.valor.toFixed(2)}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
     </div>
   )
 }
-
 // Página para cadastrar ativos
 export function CadastroAtivo() {
   const [nome, setNome] = useState('')

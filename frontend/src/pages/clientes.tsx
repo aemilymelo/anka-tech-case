@@ -6,9 +6,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
-import { Input } from '@/components/ui/input';
+import { Input } from "@/components/ui/input";
+import { Table, TableHeader, TableBody, TableRow, TableCell, TableHead } from "@/components/ui/table";
+import { useRouter } from "next/router";
 
-
+// Definindo o tipo do Cliente
 type Cliente = {
   id: number;
   nome: string;
@@ -16,6 +18,7 @@ type Cliente = {
   status: boolean;
 };
 
+// Schema para validação com Zod
 const clienteSchema = z.object({
   nome: z.string().min(1, "Nome obrigatório"),
   email: z.string().email("Email inválido"),
@@ -25,12 +28,15 @@ const clienteSchema = z.object({
 type ClienteFormData = z.infer<typeof clienteSchema>;
 
 export default function ClientesPage() {
-  const {
-    data: clientes,
-    isLoading,
-    error,
-    refetch,
-  } = useQuery({
+  const router = useRouter();
+
+  // Função para voltar à página anterior
+  const handleBack = () => {
+    router.back(); // Retorna para a página anterior
+  };
+
+  // Função para buscar os clientes da API
+  const { data: clientes, isLoading, error, refetch } = useQuery({
     queryKey: ["clientes"],
     queryFn: async () => {
       const response = await axios.get<Cliente[]>("http://localhost:3333/clientes");
@@ -38,12 +44,14 @@ export default function ClientesPage() {
     },
   });
 
+  // Estado para edição de cliente
   const [editingClient, setEditingClient] = useState<Cliente | null>(null);
   const [showAtivoForm, setShowAtivoForm] = useState(false);
   const [clienteIdForAtivo, setClienteIdForAtivo] = useState<number | null>(null);
   const [nomeAtivo, setNomeAtivo] = useState("");
   const [valorAtivo, setValorAtivo] = useState("");
 
+  // Configuração do React Hook Form
   const {
     register,
     handleSubmit,
@@ -57,6 +65,7 @@ export default function ClientesPage() {
     },
   });
 
+  // Função de submit para cadastrar ou editar cliente
   const onSubmit = async (data: ClienteFormData) => {
     try {
       if (editingClient) {
@@ -75,6 +84,7 @@ export default function ClientesPage() {
     }
   };
 
+  // Função para editar os dados de um cliente
   const handleEdit = (cliente: Cliente) => {
     setValue("nome", cliente.nome);
     setValue("email", cliente.email);
@@ -82,6 +92,7 @@ export default function ClientesPage() {
     setEditingClient(cliente);
   };
 
+  // Função para deletar um cliente
   const handleDelete = async (id: number) => {
     try {
       await axios.delete(`http://localhost:3333/clientes/${id}`);
@@ -92,11 +103,13 @@ export default function ClientesPage() {
     }
   };
 
+  // Função para adicionar ativo ao cliente
   const handleAddAtivo = (clienteId: number) => {
     setClienteIdForAtivo(clienteId);
     setShowAtivoForm(true);
   };
 
+  // Função para cadastrar um ativo para o cliente
   const handleCadastrarAtivo = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -125,38 +138,40 @@ export default function ClientesPage() {
 
   return (
     <div style={{ padding: "2rem" }}>
+      <Button onClick={handleBack}>Voltar</Button>
       <h1>Lista de Clientes</h1>
 
-      <table border={1} cellPadding={10} cellSpacing={0}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Ativos</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody>
+      {/* Tabela de Clientes com o componente Table do ShadCN */}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>ID</TableHead>
+            <TableHead>Nome</TableHead>
+            <TableHead>Email</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Ativos</TableHead>
+            <TableHead>Ações</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
           {clientes?.map((cliente) => (
-            <tr key={cliente.id}>
-              <td>{cliente.id}</td>
-              <td>{cliente.nome}</td>
-              <td>{cliente.email}</td>
-              <td>{cliente.status ? "Ativo" : "Inativo"}</td>
-              <td>
+            <TableRow key={cliente.id}>
+              <TableCell>{cliente.id}</TableCell>
+              <TableCell>{cliente.nome}</TableCell>
+              <TableCell>{cliente.email}</TableCell>
+              <TableCell>{cliente.status ? "Ativo" : "Inativo"}</TableCell>
+              <TableCell>
                 <Link href={`/ativos-cliente/${cliente.id}`}>Ver</Link>
-              </td>
-              <td>
+              </TableCell>
+              <TableCell>
                 <Button onClick={() => handleEdit(cliente)}>Editar</Button>
                 <Button onClick={() => handleDelete(cliente.id)}>Deletar</Button>
                 <Button onClick={() => handleAddAtivo(cliente.id)}>Adicionar Ativo</Button>
-              </td>
-            </tr>
+              </TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
+        </TableBody>
+      </Table>
 
       <h2>{editingClient ? "Editar Cliente" : "Cadastrar Novo Cliente"}</h2>
       <form onSubmit={handleSubmit(onSubmit)}>
