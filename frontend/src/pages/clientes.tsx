@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
+import Link from 'next/link'
 
 type Cliente = {
   id: number
@@ -41,6 +42,9 @@ export default function ClientesPage() {
               <td>{cliente.nome}</td>
               <td>{cliente.email}</td>
               <td>{cliente.status ? 'Ativo' : 'Inativo'}</td>
+              <td>
+                <Link href={`/ativos-cliente/${cliente.id}`}>Ver Ativos</Link>
+                </td>
             </tr>
           ))}
         </tbody>
