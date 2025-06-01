@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button";
 import { Input } from '@/components/ui/input';
 
+// Definindo o tipo do Ativo
 type Ativo = {
   id: number
   nome: string
@@ -81,45 +82,43 @@ export default function AtivosPorClientePage() {
     }
   }
 
-  if (isLoading) return <p>Carregando ativos...</p>
-  if (error) return <p>Erro ao carregar ativos</p>
+  if (isLoading) return <p className="text-center text-gray-500">Carregando ativos...</p>
+  if (error) return <p className="text-center text-red-500">Erro ao carregar ativos</p>
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Ativos do Cliente {id}</h1>
+    <div className="max-w-6xl mx-auto px-6 py-8">
+      <h1 className="text-3xl font-semibold text-[#161616] mb-6">Ativos do Cliente {id}</h1>
 
-      <table border={1} cellPadding={10} cellSpacing={0}>
+      <table className="min-w-full bg-white rounded-lg shadow-md">
         <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nome</th>
-            <th>Valor</th>
-            <th>Ações</th>
+          <tr className="bg-[#d8d8d5]">
+            <th className="px-4 py-2 text-left">ID</th>
+            <th className="px-4 py-2 text-left">Nome</th>
+            <th className="px-4 py-2 text-left">Valor</th>
+            <th className="px-4 py-2 text-left">Ações</th>
           </tr>
         </thead>
         <tbody>
           {ativos?.map((ativo) => (
-            <tr key={ativo.id}>
-              <td>{ativo.id}</td>
-              <td>{ativo.nome}</td>
-              <td>R$ {ativo.valor.toFixed(2)}</td>
-              <td>
-                <Button onClick={() => handleEdit(ativo)}>Editar</Button>
-                <Button onClick={() => handleDelete(ativo.id)}>Deletar</Button>
+            <tr key={ativo.id} className="hover:bg-gray-100">
+              <td className="px-4 py-2 border-t">{ativo.id}</td>
+              <td className="px-4 py-2 border-t">{ativo.nome}</td>
+              <td className="px-4 py-2 border-t">R$ {ativo.valor.toFixed(2)}</td>
+              <td className="px-4 py-2 border-t flex space-x-2 justify-start">
+
+                <Button onClick={() => handleEdit(ativo)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-md">Editar</Button>
+                <Button onClick={() => handleDelete(ativo.id)} className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">Deletar</Button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h2 style={{ marginTop: '2rem' }}>
-        {editingAtivo ? 'Editar Ativo' : 'Cadastrar Novo Ativo'}
-      </h2>
-
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <h2 className="text-2xl font-semibold text-[#161616] mt-8">{editingAtivo ? 'Editar Ativo' : 'Cadastrar Novo Ativo'}</h2>
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 mt-4">
         <div>
-          <Input type="text" placeholder="Nome do ativo" {...register('nome')} />
-          {errors.nome && <p style={{ color: 'red' }}>{errors.nome.message}</p>}
+          <Input type="text" placeholder="Nome do ativo" {...register('nome')} className="w-full p-2 border border-[#d8d8d5] rounded-md" />
+          {errors.nome && <p className="text-red-500">{errors.nome.message}</p>}
         </div>
         <div>
           <Input
@@ -127,10 +126,11 @@ export default function AtivosPorClientePage() {
             step="0.01"
             placeholder="Valor"
             {...register('valor')}
+            className="w-full p-2 border border-[#d8d8d5] rounded-md"
           />
-          {errors.valor && <p style={{ color: 'red' }}>{errors.valor.message}</p>}
+          {errors.valor && <p className="text-red-500">{errors.valor.message}</p>}
         </div>
-        <Button type="submit">
+        <Button type="submit" className="w-full py-3 bg-[#fa4515] hover:bg-[#e03d10] text-white rounded-md">
           {editingAtivo ? 'Atualizar Ativo' : 'Cadastrar Ativo'}
         </Button>
       </form>
