@@ -63,8 +63,8 @@ Este projeto consiste em uma aplicação full stack desenvolvida com **Next.js (
 ### 1. Clonar o repositório
 
 ```bash
-git clone https://github.com/seu-usuario/nome-do-projeto.git
-cd nome-do-projeto
+git clone [https://github.com/seu-usuario/nome-do-projeto.git](https://github.com/aemilymelo/anka-tech-case.git)
+cd anka-tech-case
 ```
 
 ### 2. Inicializar o banco de dados (MySQL via Docker)
