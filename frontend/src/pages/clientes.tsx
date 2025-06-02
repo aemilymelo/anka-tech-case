@@ -1,12 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import Link from "next/link";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { useQuery } from "@tanstack/react-query"
+import axios from "axios"
+import Link from "next/link"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import {
   Table,
   TableHeader,
@@ -14,42 +14,42 @@ import {
   TableRow,
   TableCell,
   TableHead,
-} from "@/components/ui/table";
-import { useRouter } from "next/router";
+} from "@/components/ui/table"
+import { useRouter } from "next/router"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/ui/select"
 
-// Definindo o tipo do Cliente
+// Tipagem do cliente retornado pela API
 type Cliente = {
-  id: number;
-  nome: string;
-  email: string;
-  status: boolean;
-};
+  id: number
+  nome: string
+  email: string
+  status: boolean
+}
 
-// Schema para validação com Zod
+// Validação do formulário com Zod
 const clienteSchema = z.object({
   nome: z.string().min(1, "Nome obrigatório"),
   email: z.string().email("Email inválido"),
   status: z.coerce.boolean(),
-});
+})
 
-type ClienteFormData = z.infer<typeof clienteSchema>;
+type ClienteFormData = z.infer<typeof clienteSchema>
 
 export default function ClientesPage() {
-  const router = useRouter();
+  const router = useRouter()
 
-  // Função para voltar à página anterior
+  // Retorna para a página anterior
   const handleBack = () => {
-    router.back();
-  };
+    router.back()
+  }
 
-  // Função para buscar os clientes da API
+  // Consulta os clientes da API
   const {
     data: clientes,
     isLoading,
@@ -58,23 +58,19 @@ export default function ClientesPage() {
   } = useQuery({
     queryKey: ["clientes"],
     queryFn: async () => {
-      const response = await axios.get<Cliente[]>(
-        "http://localhost:3333/clientes"
-      );
-      return response.data;
+      const response = await axios.get<Cliente[]>("http://localhost:3333/clientes")
+      return response.data
     },
-  });
+  })
 
-  // Estado para edição de cliente
-  const [editingClient, setEditingClient] = useState<Cliente | null>(null);
-  const [showAtivoForm, setShowAtivoForm] = useState(false);
-  const [clienteIdForAtivo, setClienteIdForAtivo] = useState<number | null>(
-    null
-  );
-  const [nomeAtivo, setNomeAtivo] = useState("");
-  const [valorAtivo, setValorAtivo] = useState("");
+  // Estados auxiliares
+  const [editingClient, setEditingClient] = useState<Cliente | null>(null)
+  const [showAtivoForm, setShowAtivoForm] = useState(false)
+  const [clienteIdForAtivo, setClienteIdForAtivo] = useState<number | null>(null)
+  const [nomeAtivo, setNomeAtivo] = useState("")
+  const [valorAtivo, setValorAtivo] = useState("")
 
-  // Configuração do React Hook Form
+  // Configuração do React Hook Form com Zod
   const {
     register,
     handleSubmit,
@@ -87,88 +83,78 @@ export default function ClientesPage() {
     defaultValues: {
       status: true,
     },
-  });
+  })
 
-  // Função de submit para cadastrar ou editar cliente
+  // Envia os dados do formulário para criar ou atualizar um cliente
   const onSubmit = async (data: ClienteFormData) => {
     try {
       if (editingClient) {
-        await axios.put(
-          `http://localhost:3333/clientes/${editingClient.id}`,
-          data
-        );
-        alert("Cliente atualizado com sucesso!");
+        await axios.put(`http://localhost:3333/clientes/${editingClient.id}`, data)
+        alert("Cliente atualizado com sucesso!")
       } else {
-        await axios.post("http://localhost:3333/clientes", data);
-        alert("Cliente cadastrado com sucesso!");
+        await axios.post("http://localhost:3333/clientes", data)
+        alert("Cliente cadastrado com sucesso!")
       }
 
-      reset();
-      setEditingClient(null);
-      refetch();
-    } catch (error) {
-      alert("Erro ao cadastrar ou editar cliente");
+      reset()
+      setEditingClient(null)
+      refetch()
+    } catch {
+      alert("Erro ao cadastrar ou editar cliente")
     }
-  };
+  }
 
-  // Função para editar os dados de um cliente
+  // Preenche o formulário com os dados do cliente selecionado para edição
   const handleEdit = (cliente: Cliente) => {
-    setValue("nome", cliente.nome);
-    setValue("email", cliente.email);
-    setValue("status", cliente.status);
-    setEditingClient(cliente);
-  };
+    setValue("nome", cliente.nome)
+    setValue("email", cliente.email)
+    setValue("status", cliente.status)
+    setEditingClient(cliente)
+  }
 
-  // Função para deletar um cliente
+  // Remove cliente pelo ID
   const handleDelete = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:3333/clientes/${id}`);
-      alert("Cliente deletado com sucesso!");
-      refetch();
-    } catch (error) {
-      alert("Erro ao deletar cliente");
+      await axios.delete(`http://localhost:3333/clientes/${id}`)
+      alert("Cliente deletado com sucesso!")
+      refetch()
+    } catch {
+      alert("Erro ao deletar cliente")
     }
-  };
+  }
 
-  // Função para adicionar ativo ao cliente
+  // Abre o formulário de ativo associado a um cliente
   const handleAddAtivo = (clienteId: number) => {
-    setClienteIdForAtivo(clienteId);
-    setShowAtivoForm(true);
-  };
+    setClienteIdForAtivo(clienteId)
+    setShowAtivoForm(true)
+  }
 
-  // Função para cadastrar um ativo para o cliente
+  // Cadastra um novo ativo vinculado ao cliente selecionado
   const handleCadastrarAtivo = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!nomeAtivo || !valorAtivo) {
-      alert("Preencha todos os campos!");
-      return;
+      alert("Preencha todos os campos!")
+      return
     }
 
     try {
-      await axios.post(
-        `http://localhost:3333/clientes/${clienteIdForAtivo}/ativos`,
-        {
-          nome: nomeAtivo,
-          valor: parseFloat(valorAtivo),
-        }
-      );
-      alert("Ativo adicionado com sucesso!");
-      setShowAtivoForm(false);
-      setNomeAtivo("");
-      setValorAtivo("");
-      refetch();
-    } catch (error) {
-      alert("Erro ao cadastrar ativo");
+      await axios.post(`http://localhost:3333/clientes/${clienteIdForAtivo}/ativos`, {
+        nome: nomeAtivo,
+        valor: parseFloat(valorAtivo),
+      })
+      alert("Ativo adicionado com sucesso!")
+      setShowAtivoForm(false)
+      setNomeAtivo("")
+      setValorAtivo("")
+      refetch()
+    } catch {
+      alert("Erro ao cadastrar ativo")
     }
-  };
+  }
 
-  if (isLoading)
-    return <p className="text-center text-gray-500">Carregando...</p>;
-  if (error)
-    return (
-      <p className="text-center text-red-500">Erro ao carregar os clientes</p>
-    );
+  if (isLoading) return <p className="text-center text-gray-500">Carregando...</p>
+  if (error) return <p className="text-center text-red-500">Erro ao carregar os clientes</p>
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -178,11 +164,10 @@ export default function ClientesPage() {
       >
         Voltar
       </Button>
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">
-        Lista de Clientes
-      </h1>
 
-      {/* Tabela de Clientes com o componente Table do ShadCN */}
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Lista de Clientes</h1>
+
+      {/* Tabela de listagem dos clientes */}
       <Table className="min-w-full bg-white rounded-lg shadow-md">
         <TableHeader>
           <TableRow className="bg-gray-100">
@@ -198,12 +183,8 @@ export default function ClientesPage() {
           {clientes?.map((cliente) => (
             <TableRow key={cliente.id} className="hover:bg-gray-100">
               <TableCell className="px-4 py-2 border-t">{cliente.id}</TableCell>
-              <TableCell className="px-4 py-2 border-t">
-                {cliente.nome}
-              </TableCell>
-              <TableCell className="px-4 py-2 border-t">
-                {cliente.email}
-              </TableCell>
+              <TableCell className="px-4 py-2 border-t">{cliente.nome}</TableCell>
+              <TableCell className="px-4 py-2 border-t">{cliente.email}</TableCell>
               <TableCell className="px-4 py-2 border-t">
                 {cliente.status ? "Ativo" : "Inativo"}
               </TableCell>
@@ -240,6 +221,7 @@ export default function ClientesPage() {
         </TableBody>
       </Table>
 
+      {/* Formulário de cliente */}
       <h2 className="text-2xl font-semibold text-gray-800 mt-8">
         {editingClient ? "Editar Cliente" : "Cadastrar Novo Cliente"}
       </h2>
@@ -261,9 +243,7 @@ export default function ClientesPage() {
             {...register("email")}
             className="w-full p-2 border border-gray-300 rounded-md"
           />
-          {errors.email && (
-            <p className="text-red-500">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-red-500">{errors.email.message}</p>}
         </div>
 
         <div>
@@ -289,11 +269,10 @@ export default function ClientesPage() {
         </Button>
       </form>
 
+      {/* Formulário de ativo vinculado a cliente */}
       {showAtivoForm && (
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Cadastrar Novo Ativo
-          </h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Cadastrar Novo Ativo</h2>
           <form onSubmit={handleCadastrarAtivo} className="space-y-4">
             <div>
               <Input
@@ -324,5 +303,5 @@ export default function ClientesPage() {
         </div>
       )}
     </div>
-  );
+  )
 }

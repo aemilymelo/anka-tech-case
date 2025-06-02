@@ -15,7 +15,7 @@ export default function Home() {
       </div>
 
       {/* Título da Página */}
-      <h1 className="text-4xl font-bold text-blue-600">Bem-vindo ao sistema</h1>
+      <h1 className="text-4xl font-bold text-blue-600">Bem-vindo ao Sistema de Gestão de Clientes e Ativos</h1>
 
       {/* Texto explicativo */}
       <p className="text-lg text-gray-700 max-w-4xl mx-auto mt-4 px-6">

@@ -5,7 +5,7 @@ services:
     image: mysql:8
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: minhasenha
+      MYSQL_ROOT_PASSWORD: hT4s@9xLp#Kwz2!
       MYSQL_DATABASE: ankadb
     ports:
       - "3306:3306"
