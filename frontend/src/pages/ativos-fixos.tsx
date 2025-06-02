@@ -2,8 +2,16 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { useRouter } from 'next/router';
 import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
+} from "@/components/ui/table";
 
+// Tipagem dos dados de ativo fixo retornados pela API
 type AtivoFixo = {
   id: number;
   nome: string;
@@ -13,12 +21,12 @@ type AtivoFixo = {
 export default function AtivosFixosPage() {
   const router = useRouter();
 
-  // Função para voltar à página anterior
+  // Retorna para a página anterior
   const handleBack = () => {
-    router.back(); // Retorna para a página anterior
+    router.back();
   };
 
-  // Função para buscar os ativos fixos da API
+  // Busca os ativos fixos do backend
   const { data: ativos, isLoading, error } = useQuery({
     queryKey: ['ativos-fixos'],
     queryFn: async () => {
@@ -27,16 +35,26 @@ export default function AtivosFixosPage() {
     }
   });
 
-  if (isLoading) return <p className="text-center text-gray-500">Carregando ativos fixos...</p>;
-  if (error) return <p className="text-center text-red-500">Erro ao carregar ativos fixos</p>;
+  if (isLoading)
+    return <p className="text-center text-gray-500">Carregando ativos fixos...</p>;
+
+  if (error)
+    return <p className="text-center text-red-500">Erro ao carregar ativos fixos</p>;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
-      <Button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600">
+      <Button
+        onClick={handleBack}
+        className="mb-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+      >
         Voltar
       </Button>
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Lista de Ativos Fixos (Mercado)</h1>
 
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+        Lista de Ativos Fixos (Mercado)
+      </h1>
+
+      {/* Tabela de exibição dos ativos fixos disponíveis no sistema */}
       <Table className="min-w-full bg-white rounded-lg shadow-md">
         <TableHeader>
           <TableRow className="bg-gray-100">
@@ -48,9 +66,15 @@ export default function AtivosFixosPage() {
         <TableBody>
           {ativos?.map((ativo) => (
             <TableRow key={ativo.id} className="hover:bg-gray-50">
-              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">{ativo.id}</TableCell>
-              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">{ativo.nome}</TableCell>
-              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">R$ {ativo.valor.toFixed(2)}</TableCell>
+              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">
+                {ativo.id}
+              </TableCell>
+              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">
+                {ativo.nome}
+              </TableCell>
+              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">
+                R$ {ativo.valor.toFixed(2)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

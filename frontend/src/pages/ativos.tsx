@@ -1,50 +1,73 @@
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
-import { useState } from 'react';
-import { Button } from "@/components/ui/button";
-import { Input } from '@/components/ui/input';
-import { useRouter } from 'next/router';
-import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+import { useState } from 'react'
+import { Button } from "@/components/ui/button"
+import { Input } from '@/components/ui/input'
+import { useRouter } from 'next/router'
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell
+} from "@/components/ui/table"
 
+// Tipagem dos dados de ativo retornados pela API
 type Ativo = {
-  id: number;
-  nome: string;
-  valor: number;
-};
+  id: number
+  nome: string
+  valor: number
+}
 
-// Página para listar ativos
 export default function AtivosPage() {
-  const router = useRouter();
-  
-  const handleBack = () => {
-    router.back();
-  };
+  const router = useRouter()
 
-  const handleRedirectToFixedAssets = () => {
-    router.push('/ativos-fixos'); 
+  // Navega de volta para a página anterior
+  const handleBack = () => {
+    router.back()
   }
 
+  // Redireciona para a rota de ativos fixos
+  const handleRedirectToFixedAssets = () => {
+    router.push('/ativos-fixos')
+  }
+
+  // Busca lista de ativos da API
   const { data: ativos, isLoading, error } = useQuery({
     queryKey: ['ativos'],
     queryFn: async () => {
-      const response = await axios.get<Ativo[]>('http://localhost:3333/ativos');
-      return response.data;
+      const response = await axios.get<Ativo[]>('http://localhost:3333/ativos')
+      return response.data
     }
-  });
+  })
 
-  if (isLoading) return <p className="text-center text-gray-500">Carregando ativos...</p>;
-  if (error) return <p className="text-center text-red-500">Erro ao carregar ativos</p>;
+  if (isLoading)
+    return <p className="text-center text-gray-500">Carregando ativos...</p>
+  if (error)
+    return <p className="text-center text-red-500">Erro ao carregar ativos</p>
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
-      <Button onClick={handleBack} className="mb-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600">
+      <Button
+        onClick={handleBack}
+        className="mb-4 px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600"
+      >
         Voltar
       </Button>
-      <Button onClick={handleRedirectToFixedAssets} className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+
+      <Button
+        onClick={handleRedirectToFixedAssets}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
+      >
         Ir para Ativos Fixos
       </Button>
-      <h1 className="text-3xl font-semibold text-gray-800 mb-6">Lista de Ativos</h1>
 
+      <h1 className="text-3xl font-semibold text-gray-800 mb-6">
+        Lista de Ativos
+      </h1>
+
+      {/* Tabela de exibição dos ativos cadastrados */}
       <Table className="min-w-full bg-white rounded-lg shadow-md">
         <TableHeader>
           <TableRow className="bg-gray-100">
@@ -58,35 +81,38 @@ export default function AtivosPage() {
             <TableRow key={ativo.id} className="hover:bg-gray-50">
               <TableCell className="px-4 py-2 border-t text-sm text-gray-800">{ativo.id}</TableCell>
               <TableCell className="px-4 py-2 border-t text-sm text-gray-800">{ativo.nome}</TableCell>
-              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">R$ {ativo.valor.toFixed(2)}</TableCell>
+              <TableCell className="px-4 py-2 border-t text-sm text-gray-800">
+                R$ {ativo.valor.toFixed(2)}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
-  );
+  )
 }
 
-// Página para cadastrar ativos
+// Componente para cadastrar um novo ativo
 export function CadastroAtivo() {
-  const [nome, setNome] = useState('');
-  const [valor, setValor] = useState('');
-  const [clienteId, setClienteId] = useState('');
+  const [nome, setNome] = useState('')
+  const [valor, setValor] = useState('')
+  const [clienteId, setClienteId] = useState('')
 
+  // Envia os dados do formulário para criar um novo ativo
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     try {
       await axios.post('http://localhost:3333/ativos', {
         nome,
         valor: parseFloat(valor),
         clienteId: parseInt(clienteId),
-      });
-      alert('Ativo cadastrado com sucesso!');
-    } catch (error) {
-      alert('Erro ao cadastrar ativo');
+      })
+      alert('Ativo cadastrado com sucesso!')
+    } catch {
+      alert('Erro ao cadastrar ativo')
     }
-  };
+  }
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-8">
@@ -107,8 +133,8 @@ export function CadastroAtivo() {
             placeholder="Valor"
             value={valor}
             onChange={(e) => setValor(e.target.value)}
-            className="w-full p-3 border border-gray-300 rounded-md"
             step="0.01"
+            className="w-full p-3 border border-gray-300 rounded-md"
           />
         </div>
         <div>
@@ -120,10 +146,13 @@ export function CadastroAtivo() {
             className="w-full p-3 border border-gray-300 rounded-md"
           />
         </div>
-        <Button type="submit" className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
+        <Button
+          type="submit"
+          className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+        >
           Cadastrar Ativo
         </Button>
       </form>
     </div>
-  );
+  )
 }

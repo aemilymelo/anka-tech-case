@@ -6,7 +6,7 @@ import fastifyCors from '@fastify/cors'
 const app = Fastify()
 app.register(fastifyCors, {
   origin: '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Permitir todas as origens. Ajuste conforme necessário.
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Permitir todas as origens
 })
 const prisma = new PrismaClient()
 
@@ -132,7 +132,7 @@ app.put('/ativos/:id', async (request, reply) => {
 
   const schemaBody = z.object({
     nome: z.string(),
-    valor: z.number().min(0), // Valor não pode ser negativo
+    valor: z.number().min(0),
   })
 
   const { id } = schemaParams.parse(request.params)
@@ -187,7 +187,7 @@ app.delete('/clientes/:id', async (request, reply) => {
   }
 })
 
-// Rota: listar ativos fixos (dados estáticos)
+// Rota: listar ativos fixos
 app.get('/ativos-fixos', async () => {
   const ativosFixos = [
     { id: 1, nome: 'Ação XYZ', valor: 150.5 },
