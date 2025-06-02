@@ -63,7 +63,7 @@ Este projeto consiste em uma aplicação full stack desenvolvida com **Next.js (
 ### 1. Clonar o repositório
 
 ```bash
-git clone [https://github.com/seu-usuario/nome-do-projeto.git](https://github.com/aemilymelo/anka-tech-case.git)
+git clone https://github.com/aemilymelo/anka-tech-case.git
 cd anka-tech-case
 ```
 
