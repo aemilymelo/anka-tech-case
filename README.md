@@ -138,7 +138,29 @@ anka-tech-case/
 * `DELETE /ativos/:id` – Excluir ativo
 
 ---
+## 🌐 Telas do Sistema
 
+### 1. Tela Inicial (Home)
+Esta tela apresenta o **bem-vindo ao sistema** e opções de navegação para clientes e ativos financeiros.
+
+![Tela Home](frontend/public/img/telainicial.png)
+
+### 2. Tela de Clientes
+Na tela de clientes, é possível visualizar a lista de clientes, além de adicionar, editar e excluir registros.
+
+![Tela de Clientes](frontend/public/img/telacliente.png)
+
+### 3. Tela de Ativos
+A tela de ativos apresenta os ativos financeiros de todos os clientes, com a possibilidade de cadastro e visualização.
+
+![Tela de Ativos](frontend/public/img/telaativos.png)
+
+### 4. Tela de Ativos Fixos
+Aqui, a lista de ativos fixos está disponível, permitindo ao usuário visualizar os ativos de forma detalhada.
+
+![Tela de Ativos Fixos](frontend/public/img/telaativosfixos.png)
+
+---
 ## 👩‍💻 Autora
 
 **Emily Melo**
