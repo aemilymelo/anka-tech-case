@@ -104,10 +104,10 @@ anka-tech-case/
 │   └── tsconfig.json
 │
 ├── frontend/                 # Aplicação frontend em Next.js + ShadCN + Tailwind
-│   ├── public/               # Arquivos públicos (favicon, etc.)
+│   ├── public/               # Arquivos públicos (imagens, logo...)
 │   ├── src/
 │   │   ├── components/ui/    # Componentes reutilizáveis (ShadCN)
-│   │   ├── lib/              # Funções utilitárias (se houver)
+│   │   ├── lib/              # Funções utilitárias
 │   │   ├── pages/            # Páginas da aplicação
 │   │   └── styles/           # Arquivo globals.css com Tailwind
 │   ├── tailwind.config.js    # Configuração do Tailwind
